@@ -1,0 +1,23 @@
+{
+  "name": "pf-bookme-nextjs-express",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "seeder": "node utils/seeder"
+  },
+  "dependencies": {
+    "mongoose": "^5.13.7",
+    "next": "11.1.0",
+    "next-connect": "^0.10.2",
+    "react": "17.0.2",
+    "react-dom": "17.0.2"
+  },
+  "devDependencies": {
+    "eslint": "7.32.0",
+    "eslint-config-next": "11.1.0"
+  }
+}
