@@ -52,7 +52,7 @@ const Home = () => {
               <strong>No Rooms</strong>
             </div>
           ) : (
-            rooms.map((room) => <RoomItem key={room.id} room={room} />)
+            rooms.map((room) => <RoomItem key={room._id} room={room} />)
           )}
         </div>
       </section>
