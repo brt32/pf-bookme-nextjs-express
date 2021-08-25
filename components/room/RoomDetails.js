@@ -1,37 +1,35 @@
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import Head from "next/head";
-
 import { useRouter } from "next/router";
+import Head from "next/head";
+import Image from "next/image";
 
-import axios from "axios";
+import RoomFeatures from "./RoomFeatures";
 
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-import RoomFeatures from "./RoomFeatures";
+import { Carousel } from "react-bootstrap";
 
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
-
-import { Carousel } from "react-bootstrap";
-
 import { clearErrors } from "../../redux/actions/roomActions";
 
 import {
   checkBooking,
   getBookedDates,
 } from "../../redux/actions/bookingActions";
-import { CHECK_BOOKING_REQUEST } from "./../../redux/constants/bookingConstants";
+import { CHECK_BOOKING_RESET } from "../../redux/constants/bookingConstants";
+
+import getStripe from "../../utils/getStripe";
+import axios from "axios";
 
 const RoomDetails = () => {
   const [checkInDate, setCheckInDate] = useState();
   const [checkOutDate, setCheckOutDate] = useState();
   const [daysOfStay, setDaysOfStay] = useState();
+  const [paymentLoading, setPaymentLoading] = useState(false);
 
   const dispatch = useDispatch();
-
   const router = useRouter();
 
   const { dates } = useSelector((state) => state.bookedDates);
@@ -97,21 +95,50 @@ const RoomDetails = () => {
     }
   };
 
+  const bookRoom = async (id, pricePerNight) => {
+    setPaymentLoading(true);
+
+    const amount = pricePerNight * daysOfStay;
+
+    try {
+      const link = `/api/checkout_session/${id}?checkInDate=${checkInDate.toISOString()}&checkOutDate=${checkOutDate.toISOString()}&daysOfStay=${daysOfStay}`;
+
+      const { data } = await axios.get(link, { params: { amount } });
+
+      const stripe = await getStripe();
+
+      // Redirect to checkout
+      stripe.redirectToCheckout({ sessionId: data.id });
+
+      setPaymentLoading(false);
+    } catch (error) {
+      setPaymentLoading(false);
+      console.log(error);
+      toast.error(error.message);
+    }
+  };
+
   useEffect(() => {
     dispatch(getBookedDates(id));
 
     toast.error(error);
     dispatch(clearErrors());
+
+    return () => {
+      dispatch({ type: CHECK_BOOKING_RESET });
+    };
   }, [dispatch, id]);
 
   return (
     <>
       <Head>
-        <title>{room.name} - BookMe</title>
+        <title>{room.name} - BookIT</title>
       </Head>
+
       <div className="container container-fluid">
         <h2 className="mt-5">{room.name}</h2>
         <p>{room.address}</p>
+
         <div className="ratings mt-auto mb-3">
           <div className="rating-outer">
             <div
@@ -142,6 +169,7 @@ const RoomDetails = () => {
           <div className="col-12 col-md-6 col-lg-8">
             <h3>Description</h3>
             <p>{room.description}</p>
+
             <RoomFeatures room={room} />
           </div>
 
@@ -152,6 +180,7 @@ const RoomDetails = () => {
               </p>
 
               <hr />
+
               <p className="mt-5 mb-3">Pick Check In & Check Out Date</p>
 
               <DatePicker
@@ -165,20 +194,21 @@ const RoomDetails = () => {
                 selectsRange
                 inline
               />
+
               {available === true && (
-                <div className="alert alert-success my-3, font-weight-bold">
+                <div className="alert alert-success my-3 font-weight-bold">
                   Room is available. Book now.
                 </div>
               )}
 
               {available === false && (
-                <div className="alert alert-danger my-3, font-weight-bold">
+                <div className="alert alert-danger my-3 font-weight-bold">
                   Room not available. Try different dates.
                 </div>
               )}
 
               {available && !user && (
-                <div className="alert alert-danger my-3, font-weight-bold">
+                <div className="alert alert-danger my-3 font-weight-bold">
                   Login to book room.
                 </div>
               )}
@@ -186,36 +216,13 @@ const RoomDetails = () => {
               {available && user && (
                 <button
                   className="btn btn-block py-3 booking-btn"
-                  onClick={newBookingHandler}
+                  onClick={() => bookRoom(room._id, room.pricePerNight)}
+                  disabled={bookingLoading || paymentLoading ? true : false}
                 >
-                  Pay
+                  Pay - ${daysOfStay * room.pricePerNight}
                 </button>
               )}
             </div>
-          </div>
-        </div>
-
-        <div className="reviews w-75">
-          <h3>Reviews:</h3>
-          <hr />
-          <div className="review-card my-3">
-            <div className="rating-outer">
-              <div className="rating-inner"></div>
-            </div>
-            <p className="review_user">by John</p>
-            <p className="review_comment">Good Quality</p>
-
-            <hr />
-          </div>
-
-          <div className="review-card my-3">
-            <div className="rating-outer">
-              <div className="rating-inner"></div>
-            </div>
-            <p className="review_user">by John</p>
-            <p className="review_comment">Good Quality</p>
-
-            <hr />
           </div>
         </div>
       </div>
