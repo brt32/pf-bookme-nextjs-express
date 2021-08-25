@@ -16,7 +16,7 @@ const Header = () => {
 
   const logoutHandler = () => {
     signOut();
-  };
+}
 
   return (
     <nav className="navbar row justify-content-center sticky-top">
