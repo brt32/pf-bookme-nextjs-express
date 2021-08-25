@@ -1,7 +1,8 @@
 import React from "react";
+import { getSession } from "next-auth/client";
+
 import Profile from "../../components/user/Profile";
 import Layout from "../../components/layout/Layout";
-import { getSession } from "next-auth/client";
 
 const UpdateProfilePage = () => {
   return (
@@ -13,6 +14,7 @@ const UpdateProfilePage = () => {
 
 export async function getServerSideProps(context) {
   const session = await getSession({ req: context.req });
+
   if (!session) {
     return {
       redirect: {
@@ -21,6 +23,7 @@ export async function getServerSideProps(context) {
       },
     };
   }
+
   return {
     props: { session },
   };
