@@ -4,6 +4,8 @@ import Head from "next/head";
 import Image from "next/image";
 
 import RoomFeatures from "./RoomFeatures";
+import NewReview from "../review/NewReview";
+import ListReviews from "../review/ListReviews";
 
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -225,6 +227,15 @@ const RoomDetails = () => {
             </div>
           </div>
         </div>
+        <NewReview />
+
+        {room.reviews && room.reviews.length > 0 ? (
+          <ListReviews reviews={room.reviews} />
+        ) : (
+          <p>
+            <strong>No Reviews on this room</strong>
+          </p>
+        )}
       </div>
     </>
   );

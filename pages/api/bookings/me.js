@@ -12,4 +12,4 @@ dbConnect();
 
 handler.use(isAuthenticatedUser).get(myBookings);
 
-export default handler;
+export default handler; 
