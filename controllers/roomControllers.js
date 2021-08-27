@@ -3,6 +3,7 @@ import Booking from "../models/booking";
 import ErrorHandler from "../utils/errorHandler";
 import catchAsyncErrors from "../middlewares/catchAsyncErrors";
 import APIFeatures from "../utils/apiFeatures";
+import cloudinary from "cloudinary";
 
 const allRooms = catchAsyncErrors(async (req, res) => {
   const resPerPage = 8;
@@ -26,6 +27,24 @@ const allRooms = catchAsyncErrors(async (req, res) => {
 });
 
 const newRoom = catchAsyncErrors(async (req, res) => {
+  const images = req.body.images;
+
+  let imagesLinks = [];
+
+  for (let i = 0; i < images.length; i++) {
+    const result = await cloudinary.v2.uploader.upload(images[i], {
+      folder: "bookme/rooms",
+    });
+
+    imagesLinks.push({
+      public_id: result.public_id,
+      url: result.secure_url,
+    });
+  }
+
+  req.body.images = imagesLinks;
+  req.body.user = req.user._id;
+
   const room = await Room.create(req.body);
 
   res.status(200).json({ success: true, room });
@@ -48,6 +67,29 @@ const updateRoom = catchAsyncErrors(async (req, res) => {
     return next(new ErrorHandler("Room not found with this ID", 404));
   }
 
+  if (req.body.images) {
+    for (let i = 0; i < room.images.length; i++) {
+      await cloudinary.v2.uploader.destroy(room.images[i].public_id);
+    }
+
+    const images = req.body.images;
+
+    let imagesLinks = [];
+
+    for (let i = 0; i < images.length; i++) {
+      const result = await cloudinary.v2.uploader.upload(images[i], {
+        folder: "bookme/rooms",
+      });
+
+      imagesLinks.push({
+        public_id: result.public_id,
+        url: result.secure_url,
+      });
+    }
+
+    req.body.images = imagesLinks;
+  }
+
   room = await Room.findByIdAndUpdate(req.query.id, req.body, {
     new: true,
     runValidators: true,
@@ -62,6 +104,10 @@ const deleteRoom = catchAsyncErrors(async (req, res) => {
 
   if (!room) {
     return next(new ErrorHandler("Room not found with this ID", 404));
+  }
+
+  for (let i = 0; i < room.images.length; i++) {
+    await cloudinary.v2.uploader.destroy(room.images[i].public_id);
   }
 
   await room.remove();
@@ -122,6 +168,15 @@ const checkReviewAvailability = catchAsyncErrors(async (req, res) => {
   });
 });
 
+const allAdminRooms = catchAsyncErrors(async (req, res) => {
+  const rooms = await Room.find();
+
+  res.status(200).json({
+    success: true,
+    rooms,
+  });
+});
+
 export {
   allRooms,
   newRoom,
@@ -130,4 +185,5 @@ export {
   deleteRoom,
   createRoomReview,
   checkReviewAvailability,
+  allAdminRooms,
 };
