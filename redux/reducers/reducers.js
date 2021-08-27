@@ -6,12 +6,16 @@ import {
   roomDetailsReducer,
   newReviewReducer,
   checkReviewReducer,
+  roomReviewsReducer,
+  reviewReducer,
 } from "./roomReducers";
 import {
   authReducer,
   userReducer,
   forgotPasswordReducer,
   loadedUserReducer,
+  allUsersReducer,
+  userDetailsReducer,
 } from "./userReducers";
 import {
   checkBookingReducer,
@@ -28,8 +32,12 @@ const reducer = combineReducers({
   roomDetails: roomDetailsReducer,
   newReview: newReviewReducer,
   checkReview: checkReviewReducer,
+  roomReviews: roomReviewsReducer,
+  review: reviewReducer,
   auth: authReducer,
   user: userReducer,
+  allUsers: allUsersReducer,
+  userDetails: userDetailsReducer,
   forgotPassword: forgotPasswordReducer,
   loadedUser: loadedUserReducer,
   checkBooking: checkBookingReducer,

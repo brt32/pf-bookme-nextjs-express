@@ -8,6 +8,7 @@ import RoomItem from "./room/RoomItem";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 
+import { loadUser } from "../redux/actions/userActions";
 import { clearErrors } from "../redux/actions/roomActions";
 
 const Home = () => {
@@ -17,13 +18,19 @@ const Home = () => {
   const { rooms, resPerPage, roomsCount, filteredRoomsCount, error } =
     useSelector((state) => state.allRooms);
 
+  const { user } = useSelector((state) => state.loadedUser);
+
   let { location, page = 1 } = router.query;
   page = Number(page);
 
   useEffect(() => {
     toast.error(error);
     dispatch(clearErrors());
-  }, []);
+
+    if (user === null) {
+      dispatch(loadUser());
+    }
+  }, [user]);
 
   const handlePagination = (pageNumber) => {
     window.location.href = `/?page=${pageNumber}`;

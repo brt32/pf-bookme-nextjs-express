@@ -493,3 +493,21 @@ input::placeholder {
 #description_404 {
   color: grey;
 }
+
+/* ### Header Title #### */
+.htitle {
+  color: #e61e4d;
+  font-size: 1.4rem;
+  font-weight: bold;
+}
+
+.htitle a {
+  color: #e6375f;
+}
+
+.htitle a:hover,
+.htitle a:focus,
+.htitle a:active {
+  color: #d3788e;
+  text-decoration: none;
+}
